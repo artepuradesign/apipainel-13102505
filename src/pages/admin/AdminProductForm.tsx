@@ -350,9 +350,8 @@ const AdminProductForm = () => {
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Excelente">Excelente</SelectItem>
-                      <SelectItem value="Muito Bom">Muito Bom</SelectItem>
-                      <SelectItem value="Bom">Bom</SelectItem>
+                      <SelectItem value="Seminovo">Seminovo</SelectItem>
+                      <SelectItem value="Novo">Novo</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
