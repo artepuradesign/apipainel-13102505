@@ -62,13 +62,18 @@ function listarProdutos() {
     
     while ($row = $result->fetch_assoc()) {
         // Buscar imagens do produto
-        $stmtImg = $conexao->prepare("SELECT url, ordem, principal FROM produto_imagens WHERE produto_id = ? ORDER BY ordem");
+        $stmtImg = $conexao->prepare("SELECT id, url, ordem, principal FROM produto_imagens WHERE produto_id = ? ORDER BY ordem");
         $stmtImg->bind_param("i", $row['id']);
         $stmtImg->execute();
         $imgResult = $stmtImg->get_result();
         $imagens = [];
         while ($img = $imgResult->fetch_assoc()) {
-            $imagens[] = $img['url'];
+            $imagens[] = [
+                'id' => (int)$img['id'],
+                'url' => $img['url'],
+                'ordem' => (int)$img['ordem'],
+                'principal' => (bool)$img['principal']
+            ];
         }
         $stmtImg->close();
         
@@ -119,13 +124,18 @@ function buscarProduto($id) {
     $stmt->close();
     
     // Buscar imagens
-    $stmtImg = $conexao->prepare("SELECT url, ordem, principal FROM produto_imagens WHERE produto_id = ? ORDER BY ordem");
+    $stmtImg = $conexao->prepare("SELECT id, url, ordem, principal FROM produto_imagens WHERE produto_id = ? ORDER BY ordem");
     $stmtImg->bind_param("i", $id);
     $stmtImg->execute();
     $imgResult = $stmtImg->get_result();
     $imagens = [];
     while ($img = $imgResult->fetch_assoc()) {
-        $imagens[] = $img['url'];
+        $imagens[] = [
+            'id' => (int)$img['id'],
+            'url' => $img['url'],
+            'ordem' => (int)$img['ordem'],
+            'principal' => (bool)$img['principal']
+        ];
     }
     $stmtImg->close();
     

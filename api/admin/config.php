@@ -1,6 +1,7 @@
 <?php
 /**
  * Configurações do Admin
+ * Reutiliza a conexão existente do conexao.php
  */
 
 // Habilitar CORS
@@ -15,26 +16,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Configurações do banco de dados
-$db_config = [
-    'host' => '45.151.120.2',
-    'usuario' => 'u617342185_iplace',
-    'senha' => 'SUA_SENHA_AQUI', // TROQUE PELA SUA SENHA
-    'banco' => 'u617342185_iplace'
-];
+// Incluir conexão existente
+require_once __DIR__ . '/../conexao.php';
 
-// Criar conexão
+// Variável global para pool de conexão
+$poolConnection = null;
+
+/**
+ * Obtém uma conexão reutilizável (pool pattern)
+ * Reutiliza a conexão já aberta pelo conexao.php
+ */
 function getConnection() {
-    global $db_config;
+    global $conexao, $poolConnection;
     
-    $conexao = new mysqli(
-        $db_config['host'],
-        $db_config['usuario'],
-        $db_config['senha'],
-        $db_config['banco']
-    );
+    // Se já temos uma conexão do pool ativa, reutilizar
+    if ($poolConnection !== null && $poolConnection->ping()) {
+        return $poolConnection;
+    }
     
-    if ($conexao->connect_error) {
+    // Reutilizar a conexão do conexao.php
+    if (isset($conexao) && $conexao->ping()) {
+        $poolConnection = $conexao;
+        return $poolConnection;
+    }
+    
+    // Fallback: criar nova conexão se necessário
+    global $host, $usuario, $senha, $banco;
+    
+    $poolConnection = new mysqli($host, $usuario, $senha, $banco);
+    
+    if ($poolConnection->connect_error) {
         http_response_code(500);
         echo json_encode([
             'success' => false,
@@ -43,11 +54,13 @@ function getConnection() {
         exit();
     }
     
-    $conexao->set_charset("utf8mb4");
-    return $conexao;
+    $poolConnection->set_charset("utf8mb4");
+    return $poolConnection;
 }
 
-// Verificar autenticação via token
+/**
+ * Verificar autenticação via token
+ */
 function verificarAuth() {
     $headers = getallheaders();
     $token = $headers['Authorization'] ?? '';
@@ -64,7 +77,7 @@ function verificarAuth() {
     // Remover "Bearer " do início
     $token = str_replace('Bearer ', '', $token);
     
-    // Decodificar token (base64 simples para exemplo)
+    // Decodificar token (base64 simples)
     $decoded = base64_decode($token);
     $parts = explode(':', $decoded);
     
@@ -108,28 +121,32 @@ function verificarAuth() {
     
     $usuario = $result->fetch_assoc();
     $stmt->close();
-    $conexao->close();
+    // Não fechar a conexão - será reutilizada
     
     return $usuario;
 }
 
-// Resposta de sucesso
+/**
+ * Resposta de sucesso
+ */
 function responderSucesso($data, $mensagem = null) {
     $response = ['success' => true, 'data' => $data];
     if ($mensagem) {
         $response['message'] = $mensagem;
     }
-    echo json_encode($response);
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
     exit();
 }
 
-// Resposta de erro
+/**
+ * Resposta de erro
+ */
 function responderErro($mensagem, $codigo = 400) {
     http_response_code($codigo);
     echo json_encode([
         'success' => false,
         'error' => $mensagem
-    ]);
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 ?>
