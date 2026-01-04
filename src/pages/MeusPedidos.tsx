@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Package, Search, Eye, Loader2 } from "lucide-react";
-import { fetchPedidosByEmail, Pedido } from "@/services/pedidosApi";
+import { fetchPedidosByEmail, fetchPedidosByUsuarioId, Pedido } from "@/services/pedidosApi";
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   pendente: { label: "Pendente", color: "bg-yellow-100 text-yellow-800" },
@@ -24,13 +24,46 @@ const MeusPedidos = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // Carregar email salvo
+  // Carregar pedidos do usuário logado ou por email salvo
   useEffect(() => {
-    const savedEmail = localStorage.getItem("customerEmail") || localStorage.getItem("userEmail");
-    if (savedEmail) {
-      setSearchEmail(savedEmail);
-      handleSearch(savedEmail);
-    }
+    const loadOrders = async () => {
+      setIsLoading(true);
+      setHasSearched(true);
+
+      try {
+        // Primeiro tenta buscar por usuario_id se logado
+        const userDataStr = localStorage.getItem("userData");
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          if (userData.id) {
+            const pedidos = await fetchPedidosByUsuarioId(userData.id);
+            setOrders(pedidos);
+            if (userData.email) {
+              setSearchEmail(userData.email);
+            }
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // Fallback para busca por email
+        const savedEmail = localStorage.getItem("customerEmail") || localStorage.getItem("userEmail");
+        if (savedEmail) {
+          setSearchEmail(savedEmail);
+          const pedidos = await fetchPedidosByEmail(savedEmail);
+          setOrders(pedidos);
+        } else {
+          setHasSearched(false);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar pedidos:", error);
+        setOrders([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadOrders();
   }, []);
 
   const handleSearch = async (emailToSearch?: string) => {

@@ -43,6 +43,27 @@ try {
 }
 
 function handleGet($conexao) {
+    // Buscar por usuario_id
+    if (isset($_GET['usuario_id'])) {
+        $usuarioId = (int)$_GET['usuario_id'];
+
+        $stmt = $conexao->prepare("SELECT * FROM pedidos WHERE usuario_id = ? ORDER BY created_at DESC");
+        $stmt->bind_param('i', $usuarioId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $pedidos = [];
+        while ($pedido = $result->fetch_assoc()) {
+            $pedido['itens'] = fetchItensPedido($conexao, (int)$pedido['id']);
+            $pedidos[] = $pedido;
+        }
+
+        $stmt->close();
+
+        echo json_encode(['success' => true, 'data' => $pedidos], JSON_UNESCAPED_UNICODE);
+        return;
+    }
+
     // Buscar por email
     if (isset($_GET['email'])) {
         $email = trim($_GET['email']);
