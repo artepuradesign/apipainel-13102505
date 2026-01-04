@@ -181,7 +181,26 @@ const Produto = () => {
           </div>
 
           {/* Left Column - Images */}
-          <div className="space-y-2 order-2 lg:order-1">
+          <div className="space-y-2 order-2 lg:order-1 relative">
+            {/* Mobile - Favorite/Share buttons - positioned over the image */}
+            <div className="lg:hidden absolute right-2 top-2 flex items-center gap-1 z-10">
+              <button
+                onClick={() => setIsFavorite(!isFavorite)}
+                className="p-2 hover:bg-secondary/80 rounded-full transition-colors bg-background/80"
+                aria-label="Adicionar aos favoritos"
+              >
+                <Heart 
+                  className={`w-5 h-5 ${isFavorite ? "fill-primary text-primary" : "text-primary"}`} 
+                />
+              </button>
+              <button 
+                className="p-2 hover:bg-secondary/80 rounded-full transition-colors bg-background/80"
+                aria-label="Compartilhar"
+              >
+                <Share2 className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </div>
+            
             {/* Main Image */}
             <div className="relative aspect-square bg-background flex items-center justify-center rounded-lg overflow-hidden">
               <img
@@ -211,14 +230,14 @@ const Produto = () => {
               )}
             </div>
 
-            {/* Thumbnails */}
+            {/* Thumbnails - show up to 4 images */}
             {product.images.length > 1 && (
-              <div className="flex gap-3 justify-start overflow-x-auto pb-2">
-                {product.images.map((image, index) => (
+              <div className="flex gap-2 lg:gap-3 justify-start overflow-x-auto py-2">
+                {product.images.slice(0, 4).map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImage(index)}
-                    className={`w-20 h-20 flex-shrink-0 border-2 rounded-lg overflow-hidden transition-colors ${
+                    className={`w-16 h-16 lg:w-20 lg:h-20 flex-shrink-0 border-2 rounded-lg overflow-hidden transition-colors ${
                       currentImage === index 
                         ? "border-primary" 
                         : "border-border hover:border-muted-foreground"
@@ -259,25 +278,6 @@ const Produto = () => {
                   <Share2 className="w-5 h-5 text-muted-foreground" />
                 </button>
               </div>
-            </div>
-
-            {/* Mobile - Favorite/Share buttons */}
-            <div className="lg:hidden flex items-center gap-2 justify-end -mt-2">
-              <button
-                onClick={() => setIsFavorite(!isFavorite)}
-                className="p-2 hover:bg-secondary rounded-full transition-colors"
-                aria-label="Adicionar aos favoritos"
-              >
-                <Heart 
-                  className={`w-6 h-6 ${isFavorite ? "fill-primary text-primary" : "text-primary"}`} 
-                />
-              </button>
-              <button 
-                className="p-2 hover:bg-secondary rounded-full transition-colors"
-                aria-label="Compartilhar"
-              >
-                <Share2 className="w-5 h-5 text-muted-foreground" />
-              </button>
             </div>
 
             {/* SKU and Rating - Desktop Only */}
