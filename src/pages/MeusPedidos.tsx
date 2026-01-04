@@ -32,7 +32,7 @@ const MeusPedidos = () => {
 
       try {
         // Primeiro tenta buscar por usuario_id se logado
-        const userDataStr = localStorage.getItem("userData");
+        const userDataStr = localStorage.getItem("usuario");
         if (userDataStr) {
           const userData = JSON.parse(userDataStr);
           if (userData.id) {
