@@ -199,18 +199,37 @@ export const deleteAdminCategory = async (id: number): Promise<void> => {
 export interface AdminPedido {
   id: number;
   numero: string;
+  usuario_id?: number;
   nome_cliente: string;
   email_cliente: string;
   telefone_cliente?: string;
+  cpf_cliente?: string;
+  endereco_cep?: string;
+  endereco_logradouro?: string;
+  endereco_numero?: string;
+  endereco_complemento?: string;
+  endereco_bairro?: string;
+  endereco_cidade?: string;
+  endereco_estado?: string;
+  subtotal: number;
+  desconto: number;
+  frete: number;
   total: number;
-  status: string;
   forma_pagamento: string;
+  status: string;
+  codigo_rastreio?: string;
+  observacoes?: string;
   created_at: string;
+  updated_at?: string;
   itens?: Array<{
     id: number;
+    produto_id?: number;
     nome: string;
+    sku?: string;
+    imagem?: string;
     quantidade: number;
     preco_unitario: number;
+    subtotal?: number;
   }>;
 }
 
@@ -230,6 +249,35 @@ export const fetchAdminPedidos = async (limite = 50, pagina = 1): Promise<{ pedi
   }
   
   return { pedidos: data.data.pedidos, total: data.data.total };
+};
+
+export const fetchAdminPedido = async (id: number): Promise<AdminPedido> => {
+  const response = await authFetch(`${ADMIN_API_BASE}/pedidos.php?id=${id}`);
+  const data = await response.json();
+  
+  if (!data.success) {
+    throw new Error(data.error || 'Erro ao buscar pedido');
+  }
+  
+  return data.data;
+};
+
+export const updateAdminPedidoStatus = async (id: number, status: string, codigoRastreio?: string): Promise<void> => {
+  const body: Record<string, string> = { status };
+  if (codigoRastreio) {
+    body.codigo_rastreio = codigoRastreio;
+  }
+  
+  const response = await authFetch(`${ADMIN_API_BASE}/pedidos.php?id=${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+  
+  const data = await response.json();
+  
+  if (!data.success) {
+    throw new Error(data.error || 'Erro ao atualizar pedido');
+  }
 };
 
 export const fetchAdminStats = async (): Promise<AdminStats> => {

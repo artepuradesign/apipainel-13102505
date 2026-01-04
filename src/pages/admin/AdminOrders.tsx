@@ -36,97 +36,49 @@ import {
   User,
   CreditCard,
   MapPin,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
+import { fetchAdminPedidos, AdminPedido, updateAdminPedidoStatus } from "@/services/adminApi";
 
-interface Order {
-  id: string;
-  customer: string;
-  email: string;
-  phone: string;
-  products: { name: string; quantity: number; price: number }[];
-  total: number;
-  status: "pending" | "paid" | "shipped" | "delivered" | "cancelled";
-  paymentMethod: string;
-  address: string;
-  createdAt: string;
-}
+const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
+  pendente: { label: "Pendente", variant: "secondary" },
+  pago: { label: "Pago", variant: "default" },
+  preparando: { label: "Preparando", variant: "outline" },
+  enviado: { label: "Enviado", variant: "outline" },
+  entregue: { label: "Entregue", variant: "default" },
+  cancelado: { label: "Cancelado", variant: "destructive" },
+};
 
 const AdminOrders = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: "001",
-      customer: "João Silva",
-      email: "joao@email.com",
-      phone: "(11) 99999-9999",
-      products: [{ name: "iPhone 14 Pro Max 256GB", quantity: 1, price: 6499 }],
-      total: 6499,
-      status: "paid",
-      paymentMethod: "PIX",
-      address: "Rua das Flores, 123 - São Paulo, SP",
-      createdAt: "2024-01-15T10:30:00",
-    },
-    {
-      id: "002",
-      customer: "Maria Santos",
-      email: "maria@email.com",
-      phone: "(21) 88888-8888",
-      products: [
-        { name: "MacBook Air M2 256GB", quantity: 1, price: 8999 },
-        { name: "Magic Mouse", quantity: 1, price: 499 },
-      ],
-      total: 9498,
-      status: "pending",
-      paymentMethod: "Cartão de Crédito",
-      address: "Av. Brasil, 456 - Rio de Janeiro, RJ",
-      createdAt: "2024-01-15T14:20:00",
-    },
-    {
-      id: "003",
-      customer: "Pedro Costa",
-      email: "pedro@email.com",
-      phone: "(31) 77777-7777",
-      products: [{ name: "iPad Pro 11 256GB", quantity: 1, price: 5499 }],
-      total: 5499,
-      status: "shipped",
-      paymentMethod: "PIX",
-      address: "Rua Minas Gerais, 789 - Belo Horizonte, MG",
-      createdAt: "2024-01-14T16:45:00",
-    },
-    {
-      id: "004",
-      customer: "Ana Oliveira",
-      email: "ana@email.com",
-      phone: "(41) 66666-6666",
-      products: [{ name: "Apple Watch Series 9", quantity: 1, price: 3299 }],
-      total: 3299,
-      status: "delivered",
-      paymentMethod: "Cartão de Crédito",
-      address: "Rua Paraná, 321 - Curitiba, PR",
-      createdAt: "2024-01-13T09:15:00",
-    },
-    {
-      id: "005",
-      customer: "Carlos Mendes",
-      email: "carlos@email.com",
-      phone: "(51) 55555-5555",
-      products: [{ name: "AirPods Pro 2", quantity: 2, price: 1599 }],
-      total: 3198,
-      status: "cancelled",
-      paymentMethod: "PIX",
-      address: "Av. Rio Grande, 654 - Porto Alegre, RS",
-      createdAt: "2024-01-12T11:00:00",
-    },
-  ]);
+  const [orders, setOrders] = useState<AdminPedido[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<number | null>(null);
+
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      const result = await fetchAdminPedidos(100);
+      setOrders(result.pedidos);
+    } catch (error) {
+      console.error("Erro ao carregar pedidos:", error);
+      toast.error("Erro ao carregar pedidos");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("adminToken") || sessionStorage.getItem("adminToken");
     if (!token) {
       navigate("/admin/login");
+      return;
     }
+    loadOrders();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -137,27 +89,29 @@ const AdminOrders = () => {
     navigate("/admin/login");
   };
 
-  const handleStatusChange = (orderId: string, newStatus: Order["status"]) => {
-    setOrders(orders.map((order) =>
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
-    toast.success("Status atualizado com sucesso!");
+  const handleStatusChange = async (orderId: number, newStatus: string) => {
+    try {
+      setUpdating(orderId);
+      await updateAdminPedidoStatus(orderId, newStatus);
+      setOrders(orders.map((order) =>
+        order.id === orderId ? { ...order, status: newStatus } : order
+      ));
+      toast.success("Status atualizado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao atualizar status:", error);
+      toast.error("Erro ao atualizar status");
+    } finally {
+      setUpdating(null);
+    }
   };
 
-  const getStatusBadge = (status: Order["status"]) => {
-    const statusConfig = {
-      pending: { label: "Pendente", variant: "secondary" as const },
-      paid: { label: "Pago", variant: "default" as const },
-      shipped: { label: "Enviado", variant: "outline" as const },
-      delivered: { label: "Entregue", variant: "default" as const },
-      cancelled: { label: "Cancelado", variant: "destructive" as const },
-    };
-    const config = statusConfig[status];
+  const getStatusBadge = (status: string) => {
+    const config = statusConfig[status] || statusConfig.pendente;
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
   const formatPrice = (price: number) => {
-    return price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    return Number(price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   };
 
   const formatDate = (dateString: string) => {
@@ -170,10 +124,20 @@ const AdminOrders = () => {
     });
   };
 
+  const getPaymentLabel = (method: string) => {
+    const labels: Record<string, string> = {
+      pix: "PIX",
+      cartao: "Cartão de Crédito",
+      boleto: "Boleto",
+    };
+    return labels[method] || method;
+  };
+
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
-      order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.id.includes(searchTerm);
+      order.nome_cliente?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.numero?.includes(searchTerm) ||
+      order.email_cliente?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -208,11 +172,15 @@ const AdminOrders = () => {
         </div>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <ShoppingCart className="w-5 h-5" />
               Pedidos ({orders.length})
             </CardTitle>
+            <Button variant="outline" size="sm" onClick={loadOrders} disabled={loading}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Atualizar
+            </Button>
           </CardHeader>
           <CardContent>
             {/* Filters */}
@@ -220,7 +188,7 @@ const AdminOrders = () => {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por cliente ou número do pedido..."
+                  placeholder="Buscar por cliente, email ou número do pedido..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -232,118 +200,173 @@ const AdminOrders = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="pending">Pendente</SelectItem>
-                  <SelectItem value="paid">Pago</SelectItem>
-                  <SelectItem value="shipped">Enviado</SelectItem>
-                  <SelectItem value="delivered">Entregue</SelectItem>
-                  <SelectItem value="cancelled">Cancelado</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                  <SelectItem value="pago">Pago</SelectItem>
+                  <SelectItem value="preparando">Preparando</SelectItem>
+                  <SelectItem value="enviado">Enviado</SelectItem>
+                  <SelectItem value="entregue">Entregue</SelectItem>
+                  <SelectItem value="cancelado">Cancelado</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Pedido</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Pagamento</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium">#{order.id}</TableCell>
-                      <TableCell>{order.customer}</TableCell>
-                      <TableCell>{formatDate(order.createdAt)}</TableCell>
-                      <TableCell className="font-medium">{formatPrice(order.total)}</TableCell>
-                      <TableCell>{order.paymentMethod}</TableCell>
-                      <TableCell>{getStatusBadge(order.status)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Select
-                            value={order.status}
-                            onValueChange={(value) => handleStatusChange(order.id, value as Order["status"])}
-                          >
-                            <SelectTrigger className="w-32 h-8">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Pendente</SelectItem>
-                              <SelectItem value="paid">Pago</SelectItem>
-                              <SelectItem value="shipped">Enviado</SelectItem>
-                              <SelectItem value="delivered">Entregue</SelectItem>
-                              <SelectItem value="cancelled">Cancelado</SelectItem>
-                            </SelectContent>
-                          </Select>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <>
+                {/* Table */}
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Pedido</TableHead>
+                        <TableHead>Cliente</TableHead>
+                        <TableHead>Data</TableHead>
+                        <TableHead>Total</TableHead>
+                        <TableHead>Pagamento</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredOrders.map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell className="font-medium">#{order.numero}</TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{order.nome_cliente}</p>
+                              <p className="text-sm text-muted-foreground">{order.email_cliente}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>{formatDate(order.created_at)}</TableCell>
+                          <TableCell className="font-medium">{formatPrice(order.total)}</TableCell>
+                          <TableCell>{getPaymentLabel(order.forma_pagamento)}</TableCell>
+                          <TableCell>{getStatusBadge(order.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <Select
+                                value={order.status}
+                                onValueChange={(value) => handleStatusChange(order.id, value)}
+                                disabled={updating === order.id}
+                              >
+                                <SelectTrigger className="w-32 h-8">
+                                  {updating === order.id ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <SelectValue />
+                                  )}
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="pendente">Pendente</SelectItem>
+                                  <SelectItem value="pago">Pago</SelectItem>
+                                  <SelectItem value="preparando">Preparando</SelectItem>
+                                  <SelectItem value="enviado">Enviado</SelectItem>
+                                  <SelectItem value="entregue">Entregue</SelectItem>
+                                  <SelectItem value="cancelado">Cancelado</SelectItem>
+                                </SelectContent>
+                              </Select>
 
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-lg">
-                              <DialogHeader>
-                                <DialogTitle>Pedido #{order.id}</DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-6">
-                                <div className="flex items-start gap-3">
-                                  <User className="w-5 h-5 text-muted-foreground mt-0.5" />
-                                  <div>
-                                    <p className="font-medium">{order.customer}</p>
-                                    <p className="text-sm text-muted-foreground">{order.email}</p>
-                                    <p className="text-sm text-muted-foreground">{order.phone}</p>
-                                  </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                  <MapPin className="w-5 h-5 text-muted-foreground mt-0.5" />
-                                  <p className="text-sm">{order.address}</p>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                  <CreditCard className="w-5 h-5 text-muted-foreground mt-0.5" />
-                                  <p className="text-sm">{order.paymentMethod}</p>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                  <Package className="w-5 h-5 text-muted-foreground mt-0.5" />
-                                  <div className="flex-1">
-                                    <p className="font-medium mb-2">Produtos</p>
-                                    {order.products.map((product, index) => (
-                                      <div key={index} className="flex justify-between text-sm py-1">
-                                        <span>{product.name} x{product.quantity}</span>
-                                        <span>{formatPrice(product.price)}</span>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                    <Eye className="w-4 h-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-lg">
+                                  <DialogHeader>
+                                    <DialogTitle>Pedido #{order.numero}</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-6">
+                                    <div className="flex items-start gap-3">
+                                      <User className="w-5 h-5 text-muted-foreground mt-0.5" />
+                                      <div>
+                                        <p className="font-medium">{order.nome_cliente}</p>
+                                        <p className="text-sm text-muted-foreground">{order.email_cliente}</p>
+                                        {order.telefone_cliente && (
+                                          <p className="text-sm text-muted-foreground">{order.telefone_cliente}</p>
+                                        )}
                                       </div>
-                                    ))}
-                                    <div className="border-t mt-2 pt-2 flex justify-between font-medium">
-                                      <span>Total</span>
-                                      <span>{formatPrice(order.total)}</span>
+                                    </div>
+
+                                    {order.endereco_logradouro && (
+                                      <div className="flex items-start gap-3">
+                                        <MapPin className="w-5 h-5 text-muted-foreground mt-0.5" />
+                                        <p className="text-sm">
+                                          {order.endereco_logradouro}, {order.endereco_numero}
+                                          {order.endereco_complemento && ` - ${order.endereco_complemento}`}
+                                          <br />
+                                          {order.endereco_bairro} - {order.endereco_cidade}/{order.endereco_estado}
+                                          <br />
+                                          CEP: {order.endereco_cep}
+                                        </p>
+                                      </div>
+                                    )}
+
+                                    <div className="flex items-start gap-3">
+                                      <CreditCard className="w-5 h-5 text-muted-foreground mt-0.5" />
+                                      <p className="text-sm">{getPaymentLabel(order.forma_pagamento)}</p>
+                                    </div>
+
+                                    <div className="flex items-start gap-3">
+                                      <Package className="w-5 h-5 text-muted-foreground mt-0.5" />
+                                      <div className="flex-1">
+                                        <p className="font-medium mb-2">Produtos</p>
+                                        {order.itens && order.itens.length > 0 ? (
+                                          order.itens.map((item, index) => (
+                                            <div key={index} className="flex justify-between text-sm py-1">
+                                              <span>{item.nome} x{item.quantidade}</span>
+                                              <span>{formatPrice(item.preco_unitario)}</span>
+                                            </div>
+                                          ))
+                                        ) : (
+                                          <p className="text-sm text-muted-foreground">Itens não disponíveis</p>
+                                        )}
+                                        <div className="border-t mt-2 pt-2">
+                                          {order.subtotal && (
+                                            <div className="flex justify-between text-sm">
+                                              <span>Subtotal</span>
+                                              <span>{formatPrice(order.subtotal)}</span>
+                                            </div>
+                                          )}
+                                          {order.desconto > 0 && (
+                                            <div className="flex justify-between text-sm text-green-600">
+                                              <span>Desconto</span>
+                                              <span>-{formatPrice(order.desconto)}</span>
+                                            </div>
+                                          )}
+                                          {order.frete > 0 && (
+                                            <div className="flex justify-between text-sm">
+                                              <span>Frete</span>
+                                              <span>{formatPrice(order.frete)}</span>
+                                            </div>
+                                          )}
+                                          <div className="flex justify-between font-medium mt-1">
+                                            <span>Total</span>
+                                            <span>{formatPrice(order.total)}</span>
+                                          </div>
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                                </DialogContent>
+                              </Dialog>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
 
-            {filteredOrders.length === 0 && (
-              <div className="text-center py-12">
-                <ShoppingCart className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Nenhum pedido encontrado</p>
-              </div>
+                {filteredOrders.length === 0 && (
+                  <div className="text-center py-12">
+                    <ShoppingCart className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">Nenhum pedido encontrado</p>
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
