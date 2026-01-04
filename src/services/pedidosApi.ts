@@ -117,6 +117,23 @@ export const fetchPedidosByEmail = async (email: string): Promise<Pedido[]> => {
   return result.data;
 };
 
+// Buscar pedidos por usuario_id
+export const fetchPedidosByUsuarioId = async (usuarioId: number): Promise<Pedido[]> => {
+  const response = await fetch(`${API_BASE_URL}/pedidos.php?usuario_id=${usuarioId}`);
+
+  if (!response.ok) {
+    throw new Error('Erro ao buscar pedidos');
+  }
+
+  const result = await response.json();
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Erro ao buscar pedidos');
+  }
+
+  return result.data;
+};
+
 // Buscar pedido por número
 export const fetchPedidoByNumero = async (numero: string): Promise<Pedido | null> => {
   const response = await fetch(`${API_BASE_URL}/pedidos.php?numero=${encodeURIComponent(numero)}`);
