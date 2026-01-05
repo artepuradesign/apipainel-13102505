@@ -169,15 +169,15 @@ const Produto = () => {
       </div>
 
       {/* Product Section */}
-      <main className="container py-6 lg:py-10">
+      <main className="container py-4 lg:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16">
           
           {/* Mobile Only - Title and SKU First */}
-          <div className="lg:hidden order-1 space-y-3">
+          <div className="lg:hidden order-1 space-y-1">
+            <span className="text-sm text-muted-foreground block">Ref: {product.sku || product.id}</span>
             <h1 className="text-xl font-semibold text-foreground leading-tight">
               {product.condition} {product.name} {selectedColor ? `- ${selectedColor}` : ''} - {product.conditionDescription || "Excelente - Sem marcas de uso"}
             </h1>
-            <span className="text-sm text-muted-foreground block">Ref: {product.sku || product.id}</span>
           </div>
 
           {/* Left Column - Images */}
@@ -350,7 +350,7 @@ const Produto = () => {
               </button>
             </div>
 
-            {/* Color Selector */}
+            {/* Color Selector - only show registered colors */}
             {variations && variations.colors.length > 0 && (
               <div className="space-y-3">
                 <p className="text-sm font-medium text-foreground">
@@ -369,13 +369,18 @@ const Produto = () => {
                         disabled={!isAvailable}
                         className={`w-10 h-10 rounded-md border-2 transition-all relative ${
                           isSelected 
-                            ? 'border-foreground ring-1 ring-foreground' 
+                            ? 'border-foreground ring-2 ring-foreground ring-offset-2' 
                             : 'border-border hover:border-muted-foreground'
                         } ${!isAvailable ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
                         style={{ backgroundColor: color.code }}
                         aria-label={`Cor ${color.name}${!isAvailable ? ' - Indisponível' : ''}`}
                         title={`${color.name}${!isAvailable ? ' - Indisponível' : ''}`}
                       >
+                        {isSelected && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Check className="w-5 h-5 text-white drop-shadow-md" />
+                          </div>
+                        )}
                         {!isAvailable && (
                           <div className="absolute inset-0 flex items-center justify-center">
                             <div className="w-full h-[2px] bg-muted-foreground rotate-45 absolute" />
