@@ -22,7 +22,6 @@ import {
   ChevronDown,
   User,
 } from "lucide-react";
-import logoApple from "@/assets/logo-apple.svg";
 import { fetchAdminStats, fetchAdminPedidos, AdminPedido } from "@/services/adminApi";
 import Footer from "@/components/Footer";
 
@@ -174,9 +173,9 @@ const AdminDashboard = () => {
                   </nav>
                 </SheetContent>
               </Sheet>
-              <Link to="/" className="flex items-center gap-1">
-                <img src={logoApple} alt="SemiApple" className="w-5 h-5" />
-                <span className="text-lg font-bold text-primary">SemiApple</span>
+              <Link to="/" className="flex items-center">
+                <span className="text-lg font-bold text-primary">iPlace</span>
+                <span className="text-xs text-muted-foreground ml-1">seminovos</span>
               </Link>
             </div>
 

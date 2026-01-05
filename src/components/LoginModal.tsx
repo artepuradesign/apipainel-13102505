@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Lock, Loader2 } from "lucide-react";
-import logoApple from "@/assets/logo-apple.svg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -121,9 +120,9 @@ const LoginModal = ({ isOpen, onClose, defaultToRegister = false }: LoginModalPr
         {/* Header with logo and security badge */}
         <div className="bg-background border-b border-border p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
-              <img src={logoApple} alt="SemiApple" className="w-5 h-5" />
-              <span className="text-xl font-bold text-foreground">SemiApple</span>
+            <div className="flex items-center">
+              <span className="text-xl font-bold text-foreground">iPlace</span>
+              <span className="text-xs text-muted-foreground ml-1">seminovos</span>
             </div>
             <div className="h-6 w-px bg-border" />
             <div className="flex items-center gap-1">

@@ -42,7 +42,6 @@ import {
   ShoppingCart,
   DollarSign,
 } from "lucide-react";
-import logoApple from "@/assets/logo-apple.svg";
 import { toast } from "sonner";
 import { fetchAdminProducts, deleteAdminProduct, AdminProduct } from "@/services/adminApi";
 import Footer from "@/components/Footer";
@@ -149,9 +148,9 @@ const AdminProducts = () => {
                   </nav>
                 </SheetContent>
               </Sheet>
-              <Link to="/" className="flex items-center gap-1">
-                <img src={logoApple} alt="SemiApple" className="w-5 h-5" />
-                <span className="text-lg font-bold text-primary">SemiApple</span>
+              <Link to="/" className="flex items-center">
+                <span className="text-lg font-bold text-primary">iPlace</span>
+                <span className="text-xs text-muted-foreground ml-1">seminovos</span>
               </Link>
               <span className="hidden lg:inline text-muted-foreground">|</span>
               <span className="hidden lg:inline text-sm text-muted-foreground">Gerenciar Produtos</span>
