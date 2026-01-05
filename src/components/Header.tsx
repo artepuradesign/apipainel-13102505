@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ShoppingCart, User, Heart, Menu, LogOut, Package, MapPin, UserCircle, HelpCircle } from "lucide-react";
+import { ShoppingCart, User, Heart, Menu, LogOut, Package, MapPin, UserCircle, HelpCircle, Apple } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -87,9 +87,9 @@ const Header = () => {
               </SheetTrigger>
               <SheetContent side="left" className="w-[280px] p-0">
                 <div className="p-4 border-b border-border">
-                  <Link to="/" className="flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
-                    <span className="text-xl font-bold text-foreground">iPlace</span>
-                    <span className="text-xs text-muted-foreground ml-1">seminovos</span>
+                  <Link to="/" className="flex items-center gap-1" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Apple className="w-5 h-5 text-foreground" />
+                    <span className="text-xl font-bold text-foreground">SemiApple</span>
                   </Link>
                 </div>
                 
@@ -182,9 +182,9 @@ const Header = () => {
             </Sheet>
 
             {/* Logo */}
-            <Link to="/" className="flex items-center shrink-0">
-              <span className="text-xl md:text-2xl font-bold text-foreground">iPlace</span>
-              <span className="text-xs text-muted-foreground ml-1">seminovos</span>
+            <Link to="/" className="flex items-center gap-1 shrink-0">
+              <Apple className="w-5 h-5 md:w-6 md:h-6 text-foreground" />
+              <span className="text-xl md:text-2xl font-bold text-foreground">SemiApple</span>
             </Link>
 
             {/* Search - Hidden on mobile, shown on md+ */}
