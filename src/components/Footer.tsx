@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Youtube, ChevronRight, Phone, ChevronDown } from "lucide-react";
+import { Facebook, Instagram, Youtube, ChevronRight, Phone, ChevronDown, Apple } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -182,14 +182,14 @@ const Footer = () => {
             </div>
 
             {/* Logo */}
-            <div className="flex items-center">
-              <span className="text-lg md:text-xl font-bold text-foreground">iPlace</span>
-              <span className="text-xs text-muted-foreground ml-1">seminovos</span>
+            <div className="flex items-center gap-1">
+              <Apple className="w-5 h-5 text-foreground" />
+              <span className="text-lg md:text-xl font-bold text-foreground">SemiApple</span>
             </div>
 
             {/* Copyright */}
             <p className="text-xs text-muted-foreground text-center">
-              © 2026 iPlace Seminovos. Todos os direitos reservados.
+              © 2026 SemiApple. Todos os direitos reservados.
             </p>
           </div>
         </div>

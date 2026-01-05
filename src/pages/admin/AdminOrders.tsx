@@ -46,6 +46,7 @@ import {
   Menu,
   FolderTree,
   DollarSign,
+  Apple,
 } from "lucide-react";
 import { toast } from "sonner";
 import { fetchAdminPedidos, AdminPedido, updateAdminPedidoStatus } from "@/services/adminApi";
@@ -191,9 +192,9 @@ const AdminOrders = () => {
                   </nav>
                 </SheetContent>
               </Sheet>
-              <Link to="/" className="flex items-center">
-                <span className="text-lg font-bold text-primary">iPlace</span>
-                <span className="text-xs text-muted-foreground ml-1">seminovos</span>
+              <Link to="/" className="flex items-center gap-1">
+                <Apple className="w-5 h-5 text-primary" />
+                <span className="text-lg font-bold text-primary">SemiApple</span>
               </Link>
               <span className="hidden lg:inline text-muted-foreground">|</span>
               <span className="hidden lg:inline text-sm text-muted-foreground">Pedidos</span>
