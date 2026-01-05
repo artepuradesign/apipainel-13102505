@@ -32,6 +32,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
   FolderTree,
   Plus,
   Edit,
@@ -41,6 +46,10 @@ import {
   Loader2,
   RefreshCw,
   Save,
+  Menu,
+  Package,
+  ShoppingCart,
+  DollarSign,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -50,6 +59,7 @@ import {
   deleteAdminCategory,
   AdminCategory,
 } from "@/services/adminApi";
+import Footer from "@/components/Footer";
 
 const AdminCategories = () => {
   const navigate = useNavigate();
@@ -171,59 +181,163 @@ const AdminCategories = () => {
   };
 
   return (
-    <div className="min-h-screen bg-secondary">
-      {/* Header */}
-      <header className="bg-background border-b">
-        <div className="container py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/" className="text-xl font-bold text-primary">
-              iPlace<span className="text-foreground">seminovos</span>
-            </Link>
-            <span className="text-muted-foreground">|</span>
-            <span className="text-sm text-muted-foreground">Gerenciar Categorias</span>
+    <div className="min-h-screen bg-secondary flex flex-col">
+      {/* Header - Mobile optimized */}
+      <header className="bg-background border-b sticky top-0 z-50">
+        <div className="container py-3">
+          <div className="flex items-center justify-between">
+            {/* Left - Menu + Logo */}
+            <div className="flex items-center gap-3">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="lg:hidden">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-72">
+                  <nav className="flex flex-col gap-4 mt-8">
+                    <Link to="/admin/dashboard" className="flex items-center gap-2 text-foreground hover:text-primary py-2">
+                      <DollarSign className="w-5 h-5" />
+                      Dashboard
+                    </Link>
+                    <Link to="/admin/produtos" className="flex items-center gap-2 text-foreground hover:text-primary py-2">
+                      <Package className="w-5 h-5" />
+                      Produtos
+                    </Link>
+                    <Link to="/admin/categorias" className="flex items-center gap-2 text-primary font-medium py-2">
+                      <FolderTree className="w-5 h-5" />
+                      Categorias
+                    </Link>
+                    <Link to="/admin/pedidos" className="flex items-center gap-2 text-foreground hover:text-primary py-2">
+                      <ShoppingCart className="w-5 h-5" />
+                      Pedidos
+                    </Link>
+                    <hr className="my-2" />
+                    <button onClick={handleLogout} className="flex items-center gap-2 text-destructive py-2">
+                      <LogOut className="w-5 h-5" />
+                      Sair
+                    </button>
+                  </nav>
+                </SheetContent>
+              </Sheet>
+              <Link to="/" className="flex items-center">
+                <span className="text-lg font-bold text-primary">iPlace</span>
+                <span className="text-xs text-muted-foreground ml-1">seminovos</span>
+              </Link>
+              <span className="hidden lg:inline text-muted-foreground">|</span>
+              <span className="hidden lg:inline text-sm text-muted-foreground">Gerenciar Categorias</span>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleLogout} className="hidden lg:flex">
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
+            </Button>
           </div>
-          <Button variant="outline" size="sm" onClick={handleLogout}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Sair
-          </Button>
         </div>
       </header>
 
-      <div className="container py-8">
-        <div className="flex items-center gap-4 mb-6">
+      <div className="container py-4 lg:py-8 flex-1">
+        <div className="flex items-center gap-2 lg:gap-4 mb-4 lg:mb-6">
           <Button variant="ghost" size="sm" asChild>
             <Link to="/admin/dashboard">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar
+              <ArrowLeft className="w-4 h-4 mr-1 lg:mr-2" />
+              <span className="hidden sm:inline">Voltar</span>
             </Link>
           </Button>
         </div>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <FolderTree className="w-5 h-5" />
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 lg:px-6">
+            <CardTitle className="flex items-center gap-2 text-base lg:text-lg">
+              <FolderTree className="w-4 h-4 lg:w-5 lg:h-5" />
               Categorias ({categories.length})
             </CardTitle>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={loadCategories} disabled={loading}>
-                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Atualizar
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline ml-2">Atualizar</span>
               </Button>
-              <Button onClick={openNewDialog}>
-                <Plus className="w-4 h-4 mr-2" />
-                Nova Categoria
+              <Button onClick={openNewDialog} size="sm">
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline ml-2">Nova Categoria</span>
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 lg:px-6">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
             ) : (
               <>
-                <div className="overflow-x-auto">
+                {/* Mobile - Cards */}
+                <div className="lg:hidden space-y-3">
+                  {categories.map((category) => (
+                    <div key={category.id} className="border rounded-lg p-3 flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground font-mono">{category.ordem}</span>
+                          <span className="font-medium truncate">{category.nome}</span>
+                          <span
+                            className={`px-1.5 py-0.5 rounded-full text-xs ${
+                              category.ativo
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-700"
+                            }`}
+                          >
+                            {category.ativo ? "Ativo" : "Inativo"}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate">{category.slug}</p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => openEditDialog(category)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              disabled={deleting === category.id}
+                            >
+                              {deleting === category.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir categoria?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta ação não pode ser desfeita. A categoria "{category.nome}" será removida permanentemente.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(category.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop - Table */}
+                <div className="hidden lg:block overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -391,6 +505,8 @@ const AdminCategories = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Footer />
     </div>
   );
 };

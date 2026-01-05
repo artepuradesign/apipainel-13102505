@@ -27,6 +27,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
   ShoppingCart,
   Search,
   Eye,
@@ -38,9 +43,13 @@ import {
   MapPin,
   Loader2,
   RefreshCw,
+  Menu,
+  FolderTree,
+  DollarSign,
 } from "lucide-react";
 import { toast } from "sonner";
 import { fetchAdminPedidos, AdminPedido, updateAdminPedidoStatus } from "@/services/adminApi";
+import Footer from "@/components/Footer";
 
 const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
   pendente: { label: "Pendente", variant: "secondary" },
@@ -143,59 +152,95 @@ const AdminOrders = () => {
   });
 
   return (
-    <div className="min-h-screen bg-secondary">
-      {/* Header */}
-      <header className="bg-background border-b">
-        <div className="container py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/" className="text-xl font-bold text-primary">
-              iPlace<span className="text-foreground">seminovos</span>
-            </Link>
-            <span className="text-muted-foreground">|</span>
-            <span className="text-sm text-muted-foreground">Pedidos</span>
+    <div className="min-h-screen bg-secondary flex flex-col">
+      {/* Header - Mobile optimized */}
+      <header className="bg-background border-b sticky top-0 z-50">
+        <div className="container py-3">
+          <div className="flex items-center justify-between">
+            {/* Left - Menu + Logo */}
+            <div className="flex items-center gap-3">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="lg:hidden">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-72">
+                  <nav className="flex flex-col gap-4 mt-8">
+                    <Link to="/admin/dashboard" className="flex items-center gap-2 text-foreground hover:text-primary py-2">
+                      <DollarSign className="w-5 h-5" />
+                      Dashboard
+                    </Link>
+                    <Link to="/admin/produtos" className="flex items-center gap-2 text-foreground hover:text-primary py-2">
+                      <Package className="w-5 h-5" />
+                      Produtos
+                    </Link>
+                    <Link to="/admin/categorias" className="flex items-center gap-2 text-foreground hover:text-primary py-2">
+                      <FolderTree className="w-5 h-5" />
+                      Categorias
+                    </Link>
+                    <Link to="/admin/pedidos" className="flex items-center gap-2 text-primary font-medium py-2">
+                      <ShoppingCart className="w-5 h-5" />
+                      Pedidos
+                    </Link>
+                    <hr className="my-2" />
+                    <button onClick={handleLogout} className="flex items-center gap-2 text-destructive py-2">
+                      <LogOut className="w-5 h-5" />
+                      Sair
+                    </button>
+                  </nav>
+                </SheetContent>
+              </Sheet>
+              <Link to="/" className="flex items-center">
+                <span className="text-lg font-bold text-primary">iPlace</span>
+                <span className="text-xs text-muted-foreground ml-1">seminovos</span>
+              </Link>
+              <span className="hidden lg:inline text-muted-foreground">|</span>
+              <span className="hidden lg:inline text-sm text-muted-foreground">Pedidos</span>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleLogout} className="hidden lg:flex">
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
+            </Button>
           </div>
-          <Button variant="outline" size="sm" onClick={handleLogout}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Sair
-          </Button>
         </div>
       </header>
 
-      <div className="container py-8">
-        <div className="flex items-center gap-4 mb-6">
+      <div className="container py-4 lg:py-8 flex-1">
+        <div className="flex items-center gap-2 lg:gap-4 mb-4 lg:mb-6">
           <Button variant="ghost" size="sm" asChild>
             <Link to="/admin/dashboard">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar
+              <ArrowLeft className="w-4 h-4 mr-1 lg:mr-2" />
+              <span className="hidden sm:inline">Voltar</span>
             </Link>
           </Button>
         </div>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <ShoppingCart className="w-5 h-5" />
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 lg:px-6">
+            <CardTitle className="flex items-center gap-2 text-base lg:text-lg">
+              <ShoppingCart className="w-4 h-4 lg:w-5 lg:h-5" />
               Pedidos ({orders.length})
             </CardTitle>
             <Button variant="outline" size="sm" onClick={loadOrders} disabled={loading}>
-              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Atualizar
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline ml-2">Atualizar</span>
             </Button>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 lg:px-6">
             {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row gap-3 mb-4 lg:mb-6">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por cliente, email ou número do pedido..."
+                  placeholder="Buscar..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full md:w-48">
+                <SelectTrigger className="w-full sm:w-36">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -216,8 +261,113 @@ const AdminOrders = () => {
               </div>
             ) : (
               <>
-                {/* Table */}
-                <div className="overflow-x-auto">
+                {/* Mobile - Cards */}
+                <div className="lg:hidden space-y-3">
+                  {filteredOrders.map((order) => (
+                    <div key={order.id} className="border rounded-lg p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">#{order.numero}</span>
+                        {getStatusBadge(order.status)}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground truncate max-w-[150px]">{order.nome_cliente}</span>
+                        <span className="font-medium">{formatPrice(order.total)}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs text-muted-foreground">{formatDate(order.created_at)}</span>
+                        <div className="flex items-center gap-2">
+                          <Select
+                            value={order.status}
+                            onValueChange={(value) => handleStatusChange(order.id, value)}
+                            disabled={updating === order.id}
+                          >
+                            <SelectTrigger className="w-28 h-8 text-xs">
+                              {updating === order.id ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <SelectValue />
+                              )}
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pendente">Pendente</SelectItem>
+                              <SelectItem value="pago">Pago</SelectItem>
+                              <SelectItem value="preparando">Preparando</SelectItem>
+                              <SelectItem value="enviado">Enviado</SelectItem>
+                              <SelectItem value="entregue">Entregue</SelectItem>
+                              <SelectItem value="cancelado">Cancelado</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>Pedido #{order.numero}</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-6">
+                                <div className="flex items-start gap-3">
+                                  <User className="w-5 h-5 text-muted-foreground mt-0.5" />
+                                  <div>
+                                    <p className="font-medium">{order.nome_cliente}</p>
+                                    <p className="text-sm text-muted-foreground">{order.email_cliente}</p>
+                                    {order.telefone_cliente && (
+                                      <p className="text-sm text-muted-foreground">{order.telefone_cliente}</p>
+                                    )}
+                                  </div>
+                                </div>
+                                {order.endereco_logradouro && (
+                                  <div className="flex items-start gap-3">
+                                    <MapPin className="w-5 h-5 text-muted-foreground mt-0.5" />
+                                    <p className="text-sm">
+                                      {order.endereco_logradouro}, {order.endereco_numero}
+                                      {order.endereco_complemento && ` - ${order.endereco_complemento}`}
+                                      <br />
+                                      {order.endereco_bairro} - {order.endereco_cidade}/{order.endereco_estado}
+                                      <br />
+                                      CEP: {order.endereco_cep}
+                                    </p>
+                                  </div>
+                                )}
+                                <div className="flex items-start gap-3">
+                                  <CreditCard className="w-5 h-5 text-muted-foreground mt-0.5" />
+                                  <p className="text-sm">{getPaymentLabel(order.forma_pagamento)}</p>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                  <Package className="w-5 h-5 text-muted-foreground mt-0.5" />
+                                  <div className="flex-1">
+                                    <p className="font-medium mb-2">Produtos</p>
+                                    {order.itens && order.itens.length > 0 ? (
+                                      order.itens.map((item, index) => (
+                                        <div key={index} className="flex justify-between text-sm py-1">
+                                          <span>{item.nome} x{item.quantidade}</span>
+                                          <span>{formatPrice(item.preco_unitario)}</span>
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <p className="text-sm text-muted-foreground">Itens não disponíveis</p>
+                                    )}
+                                    <div className="border-t mt-2 pt-2">
+                                      <div className="flex justify-between font-medium mt-1">
+                                        <span>Total</span>
+                                        <span>{formatPrice(order.total)}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop - Table */}
+                <div className="hidden lg:block overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -371,6 +521,8 @@ const AdminOrders = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Footer />
     </div>
   );
 };
