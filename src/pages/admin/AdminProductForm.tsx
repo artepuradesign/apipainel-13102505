@@ -13,7 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save, Package, LogOut, Plus, Trash2, Loader2, ImagePlus, GripVertical, Apple } from "lucide-react";
+import { ArrowLeft, Save, Package, LogOut, Plus, Trash2, Loader2, ImagePlus, GripVertical } from "lucide-react";
+import logoApple from "@/assets/logo-apple.svg";
 import { toast } from "sonner";
 import {
   fetchAdminProduct,
@@ -265,7 +266,7 @@ const AdminProductForm = () => {
         <div className="container py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-1 text-xl font-bold text-primary">
-              <Apple className="w-5 h-5" />
+              <img src={logoApple} alt="SemiApple" className="w-5 h-5" />
               <span>SemiApple</span>
             </Link>
             <span className="text-muted-foreground">|</span>
