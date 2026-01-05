@@ -41,8 +41,8 @@ import {
   FolderTree,
   ShoppingCart,
   DollarSign,
-  Apple,
 } from "lucide-react";
+import logoApple from "@/assets/logo-apple.svg";
 import { toast } from "sonner";
 import { fetchAdminProducts, deleteAdminProduct, AdminProduct } from "@/services/adminApi";
 import Footer from "@/components/Footer";
@@ -150,7 +150,7 @@ const AdminProducts = () => {
                 </SheetContent>
               </Sheet>
               <Link to="/" className="flex items-center gap-1">
-                <Apple className="w-5 h-5 text-primary" />
+                <img src={logoApple} alt="SemiApple" className="w-5 h-5" />
                 <span className="text-lg font-bold text-primary">SemiApple</span>
               </Link>
               <span className="hidden lg:inline text-muted-foreground">|</span>

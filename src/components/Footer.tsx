@@ -1,4 +1,5 @@
-import { Facebook, Instagram, Youtube, ChevronRight, Phone, ChevronDown, Apple } from "lucide-react";
+import { Facebook, Instagram, Youtube, ChevronRight, Phone, ChevronDown } from "lucide-react";
+import logoApple from "@/assets/logo-apple.svg";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -183,7 +184,7 @@ const Footer = () => {
 
             {/* Logo */}
             <div className="flex items-center gap-1">
-              <Apple className="w-5 h-5 text-foreground" />
+              <img src={logoApple} alt="SemiApple" className="w-5 h-5" />
               <span className="text-lg md:text-xl font-bold text-foreground">SemiApple</span>
             </div>
 

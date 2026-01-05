@@ -21,8 +21,8 @@ import {
   Menu,
   ChevronDown,
   User,
-  Apple,
 } from "lucide-react";
+import logoApple from "@/assets/logo-apple.svg";
 import { fetchAdminStats, fetchAdminPedidos, AdminPedido } from "@/services/adminApi";
 import Footer from "@/components/Footer";
 
@@ -175,7 +175,7 @@ const AdminDashboard = () => {
                 </SheetContent>
               </Sheet>
               <Link to="/" className="flex items-center gap-1">
-                <Apple className="w-5 h-5 text-primary" />
+                <img src={logoApple} alt="SemiApple" className="w-5 h-5" />
                 <span className="text-lg font-bold text-primary">SemiApple</span>
               </Link>
             </div>
